@@ -2,18 +2,18 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-
-
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-
-
-// Load dữ liệu vị trí và điểm tắc nghẽn
 const locations = require('./data/locations.json');
 const trafficData = require('./data/traffic-points.json');
+
+const app = express();
+
+// 🔒 Cấu hình CORS để kết nối với Frontend (Vercel)
+app.use(cors({
+  origin: ['https://frontend-sepia-delta-56.vercel.app', 'http://localhost:3000'],
+  credentials: true,
+}));
+
+app.use(express.json());
 
 app.post('/api/check-risk', async (req, res) => {
   const { province } = req.body;
@@ -31,7 +31,6 @@ app.post('/api/check-risk', async (req, res) => {
     const response = await axios.get(url);
     const raw = response.data.daily;
 
-    // Chuyển đổi dữ liệu thành từng ngày
     const forecast = raw.time.map((date, index) => ({
       date,
       temperature: raw.temperature_2m_max[index],
@@ -44,7 +43,6 @@ app.post('/api/check-risk', async (req, res) => {
           : 'Thời tiết ổn định',
     }));
 
-    // Phân loại nguy cơ
     const highTemp = forecast.some(day => day.temperature > 35);
     const heavyRain = forecast.some(day => day.precipitation > 20);
 
@@ -65,9 +63,7 @@ app.post('/api/check-risk', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`✅ Server đang chạy tại cổng ${port}`);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Backend đang chạy tại http://localhost:${PORT}`);
 });
-
-
