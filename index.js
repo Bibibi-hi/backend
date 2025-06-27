@@ -1,18 +1,15 @@
+require('dotenv').config();
 const express = require('express');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
+
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Load SSL certificates
-const key = fs.readFileSync(path.join(__dirname, 'cert', 'key.pem'));
-const cert = fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'));
-const server = https.createServer({ key, cert }, app);
+
 
 // Load dữ liệu vị trí và điểm tắc nghẽn
 const locations = require('./data/locations.json');
@@ -68,7 +65,9 @@ app.post('/api/check-risk', async (req, res) => {
   }
 });
 
-const PORT = 5000;
-server.listen(PORT, () => {
-  console.log(`✅ Server đang chạy tại https://localhost:${PORT}`);
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`✅ Server đang chạy tại cổng ${port}`);
 });
+
+
